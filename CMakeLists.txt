@@ -27,6 +27,11 @@ add_executable(
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/loader.cpp
     ${SRC_DIR}/reader.cpp
+    ${SRC_DIR}/param_readers.cpp
+    ${SRC_DIR}/dispatchers/dispatcher.cpp
+    ${SRC_DIR}/dispatchers/metafile_desc.cpp
+    ${SRC_DIR}/utils/generic.cpp
+
 )
 
 

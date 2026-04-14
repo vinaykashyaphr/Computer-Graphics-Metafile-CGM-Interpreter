@@ -1,3 +1,5 @@
+# pragma once
+
 # include <cstdint>
 # include <fstream>
 # include <vector>
@@ -10,7 +12,7 @@ namespace fs = std::filesystem;
 
 
 
-class CgmLoader {
+class CGM {
 
     std::ifstream _stream;
     const std::string_view _logger;
@@ -18,7 +20,7 @@ class CgmLoader {
     void log_stream(std::vector<std::uint8_t>& buffer);
 
     public:
-        explicit CgmLoader(const fs::path& file_path, const std::string_view logger);
+        explicit CGM(const fs::path& file_path);
         std::unique_ptr<std::vector<std::uint8_t>> load();
 
 };

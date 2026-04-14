@@ -1,27 +1,24 @@
+# pragma once
+
+# include <string_view>
 # include <cstdint>
 # include <vector>
+# include "schemes/element.hpp"
 
 
 
 
-class ElementReader {
+class Reader {
+
+    const std::string_view _logger;
 
     public:
-        explicit ElementReader(const std::vector<std::uint8_t>& data);
-        ~ElementReader();
+        explicit Reader(const std::vector<std::uint8_t>& data);
+        ~Reader();
 
-        struct CgmElement {
-
-            std::uint8_t elem_class;
-            std::uint8_t elem_id;
-            std::vector<std::uint8_t> params;
-
-        };
-
-        std::vector<CgmElement> elements() const;
+        std::vector<CgmElement> take_elements();
 
     private:
-
         struct ElementProps;
         const std::vector<std::uint8_t>& _data;
         std::vector<CgmElement> _elements;
@@ -31,4 +28,8 @@ class ElementReader {
         bool is_partitioned(std::uint16_t& param_len, std::size_t& elem_index);
         void interpret_elems(bool is_continuation, const auto& elem_props, std::size_t& elem_index);
 
+        void log_elements() const;
+
 };
+
+

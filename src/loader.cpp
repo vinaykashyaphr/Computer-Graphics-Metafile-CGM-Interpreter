@@ -9,9 +9,9 @@
 
 
 
-CgmLoader::CgmLoader(const fs::path& file_path, const std::string_view logger): 
+CGM::CGM(const fs::path& file_path): 
     _stream(std::ifstream(file_path.string(), std::ios::binary)),
-    _logger(logger)
+    _logger("_logs/loader.log")
 {
 
     if (!(file_path.extension() == ".cgm" || file_path.extension() == ".Cgm")) {
@@ -26,7 +26,7 @@ CgmLoader::CgmLoader(const fs::path& file_path, const std::string_view logger):
 
 
 
-std::unique_ptr<std::vector<std::uint8_t>> CgmLoader::load() {
+std::unique_ptr<std::vector<std::uint8_t>> CGM::load() {
 
     _stream.seekg(0, std::ios::end);
     std::size_t size = _stream.tellg();
@@ -43,7 +43,7 @@ std::unique_ptr<std::vector<std::uint8_t>> CgmLoader::load() {
 
 
 
-void CgmLoader::log_stream(std::vector<std::uint8_t>& buffer) {
+void CGM::log_stream(std::vector<std::uint8_t>& buffer) {
 
     std::ofstream log(_logger.data());
 

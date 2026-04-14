@@ -1,8 +1,11 @@
+# include <fstream>
+# include <string>
+
 # include "reader.hpp"
 
 
 
-struct ElementReader::ElementProps {
+struct Reader::ElementProps {
 
     std::uint8_t  elem_class;
     std::uint8_t  elem_id;
@@ -12,17 +15,20 @@ struct ElementReader::ElementProps {
 
 
 
-ElementReader::ElementReader(const std::vector<std::uint8_t>& data):
-    _data(data)
+Reader::Reader(const std::vector<std::uint8_t>& data):
+    _data(data),
+    _logger("_logs/reader.log")
 {
     read();
 }
 
-ElementReader::~ElementReader() = default;
+
+
+Reader::~Reader() = default;
 
 
 
-ElementReader::ElementProps ElementReader::get_props(std::size_t& elem_index) {
+Reader::ElementProps Reader::get_props(std::size_t& elem_index) {
 
     // CGM is BIG-ENDIAN, combining 2 bytes into one
     std::uint16_t word = (
@@ -51,7 +57,7 @@ ElementReader::ElementProps ElementReader::get_props(std::size_t& elem_index) {
 // The actual parameter list length is carried in the next 16-bit word
 // Bit 15 of that word is the "not last partition" flag
 // Bits 14–0 of that word carry the actual length
-bool ElementReader::is_partitioned(std::uint16_t& param_len, std::size_t& elem_index) {
+bool Reader::is_partitioned(std::uint16_t& param_len, std::size_t& elem_index) {
 
     bool partitioned = false;
 
@@ -78,7 +84,7 @@ bool ElementReader::is_partitioned(std::uint16_t& param_len, std::size_t& elem_i
 }
 
 
-void ElementReader::interpret_elems(bool is_continuation, const auto& elem_props, std::size_t& elem_index) {
+void Reader::interpret_elems(bool is_continuation, const auto& elem_props, std::size_t& elem_index) {
 
     // Partition reassembly
     // If this element is a continuation of a previous fragment,
@@ -119,7 +125,7 @@ void ElementReader::interpret_elems(bool is_continuation, const auto& elem_props
 
 
 
-void ElementReader::read() {
+void Reader::read() {
 
     std::size_t elem_index = 0;
     bool in_partition = false;
@@ -139,13 +145,33 @@ void ElementReader::read() {
 
     }
 
+    log_elements();
+
 }
 
 
 
-std::vector<ElementReader::CgmElement> ElementReader::elements() const {
+std::vector<CgmElement> Reader::take_elements() {
     
-    return _elements;
+    return std::move(_elements);
+
+}
+
+
+
+void Reader::log_elements() const {
+
+    std::ofstream log(_logger.data());
+
+    for (const auto& elem : _elements) {
+
+        log 
+            << "class=" << std::to_string(elem.elem_class) 
+            << " id=" << std::to_string(elem.elem_id) 
+            << " param_len=" << std::to_string(elem.params.size())
+            << '\n';
+
+    }
 
 }
 

@@ -1,8 +1,10 @@
 # include <iostream>
 # include <filesystem>
 
+# include "dispatchers/dispatcher.hpp"
 # include "loader.hpp"
 # include "reader.hpp"
+# include "schemes/element.hpp"
 
 
 namespace fs = std::filesystem;
@@ -18,16 +20,23 @@ int main(int argc, char* argv[]) {
 
     fs::path input  = argv[1];
 
-    CgmLoader loader(input, "out.log");
+    CGM loader(input);
     auto buffer = loader.load();
 
-    ElementReader reader(*buffer);
-    auto elements = reader.elements();
+    std::vector<CgmElement> elements;
 
-    for (auto& el : elements) {
-        printf("class=%d id=%d params=%zu bytes\n",
-               el.elem_class, el.elem_id, el.params.size());
+    {
+        Reader reader(*buffer);
+        elements = reader.take_elements();
     }
+
+    Dispatcher dispatcher(elements);
+    dispatcher.dispatch();
+
+    // for (auto& el : elements) {
+    //     printf("class=%d id=%d params=%zu bytes\n",
+    //            el.elem_class, el.elem_id, el.params.size());
+    // }
 
 }
 
