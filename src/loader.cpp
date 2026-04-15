@@ -20,8 +20,6 @@ CGM::CGM(const fs::path& file_path):
 
     if (!_stream) throw std::runtime_error("Cannot Open: " + file_path.string());
 
-    load();
-
 };
 
 

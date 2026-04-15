@@ -25,6 +25,11 @@ void Dispatcher::dispatch() {
 
         switch (cgm_class) {
 
+            case CgmClass::DELIMITER: {
+
+                break;
+            }
+
             case CgmClass::METAFILE_DESCRIPTOR: {
 
                 _MetafileDescriptor metafile_descriptor(_state, el, log);
@@ -35,7 +40,6 @@ void Dispatcher::dispatch() {
             default:
                 generic_utils::log_unknown(el, log);
                 break;
-                
 
         }
 

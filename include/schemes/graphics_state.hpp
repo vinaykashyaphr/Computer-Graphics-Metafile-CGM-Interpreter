@@ -408,6 +408,21 @@ struct GraphicsState {
     InterpolatedInterior interpolated_interior;
     std::map<int, ColourValue> colour_table;
 
+    ColourValue get_colour(int index) const {
+
+        auto it = colour_table.find(index);
+        if (it != colour_table.end())
+            return it->second;
+
+        // index not in table — file has not defined it yet
+        // fall back to device-dependent defaults per spec
+        if (index == 0)
+            return ColourValue{ ColourRGB{255, 255, 255} };  // white background
+
+        else
+            return ColourValue{ ColourRGB{0, 0, 0} };        // black foreground
+
+    }
 
     struct Snapshot {
 

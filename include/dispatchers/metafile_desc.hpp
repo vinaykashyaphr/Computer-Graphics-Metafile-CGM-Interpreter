@@ -20,9 +20,9 @@ class _MetafileDescriptor {
 
     private:
         void handle_vdc_type();
-        // void handle_integer_precision(const CgmElement& elem);
-        // void handle_real_precision(const CgmElement& elem);
-        // void handle_index_precision(const CgmElement& elem);
+        void handle_integer_precision();
+        void handle_real_precision();
+        void handle_index_precision();
         // void handle_colour_precision(const CgmElement& elem);
         // void handle_colour_idx_prec(const CgmElement& elem);
         // void handle_name_precision(const CgmElement& elem);
