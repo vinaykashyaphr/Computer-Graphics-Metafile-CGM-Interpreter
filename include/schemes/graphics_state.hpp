@@ -7,6 +7,12 @@
 # include <array>
 # include <variant>
 
+# include "dispatchers/flags.hpp"
+
+
+
+
+
 
 struct GraphicsState {
 
@@ -637,6 +643,38 @@ struct GraphicsState {
 
     }
 
+    // BEGIN TILE ARRAY (0/19) — active while TAS() is true
+    struct TileArrayContext {
+        double   position_x              = 0.0;
+        double   position_y              = 0.0;
+        int      cell_path_direction     = 0;   // 0=right 1=left 2=up 3=down
+        int      line_prog_direction     = 0;   // 0=90CW  1=90CCW
+        int      num_tiles_path          = 0;
+        int      num_tiles_line          = 0;
+        int      num_cells_path_per_tile = 0;
+        int      num_cells_line_per_tile = 0;
+        double   cell_size_path          = 0.0;
+        double   cell_size_line          = 0.0;
+        int      image_offset_path       = 0;
+        int      image_offset_line       = 0;
+        int      image_num_cells_path    = 0;
+        int      image_num_cells_line    = 0;
+    } tile_array_ctx;
+
+    // BEGIN/END APP STRUCTURE (0/21–23) — one entry per open APS level
+    struct APSEntry {
+        std::string id;
+        std::string type;
+        int         inheritance_flag = 0;  // 0=no-inherit  1=inherit
+        std::map<std::string, std::string> attributes;  // populated by APS_ATTRIB (9/1)
+    };
+
+    std::vector<APSEntry>              aps_stack;     // back() = innermost open APS
+    std::map<std::string, APSEntry>    aps_completed; // keyed by id, filled on END_APP_STRUCTURE
+
+    // Parsing state flags
+    Flags flags;
+
     // SAVE/RESTORE PRIMITIVE CONTEXT (3/11, 3/12)
     // stack of snapshots keyed by name integer
     std::map<int, struct Snapshot> context_stack;
@@ -706,6 +744,8 @@ struct GraphicsState {
         protection_region_state = 0;
 
         context_stack.clear();
+        aps_stack.clear();
+        aps_completed.clear();
 
         segment_transforms.clear();
         segment_highlighting.clear();

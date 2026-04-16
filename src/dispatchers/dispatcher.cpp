@@ -3,6 +3,7 @@
 # include "dispatchers/metafile_desc.hpp"
 # include "utils/generic.hpp"
 # include "schemes/graphics_state.hpp"
+# include "dispatchers/delimiter.hpp"
 
 
 
@@ -26,6 +27,9 @@ void Dispatcher::dispatch() {
         switch (cgm_class) {
 
             case CgmClass::DELIMITER: {
+
+                _Delimiter delimiter(_state, el, _segment_store, _protection_regions, log);
+                delimiter.dispatch();
 
                 break;
             }
