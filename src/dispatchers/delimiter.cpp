@@ -4,7 +4,6 @@
 # include "utils/generic.hpp"
 # include <cstddef>
 # include <cstdint>
-#include <cstdlib>
 #include <stdexcept>
 # include <iostream>
 
@@ -327,7 +326,7 @@ void _Delimiter::_begin_protection_region() {
 
     else {
 
-        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: BEGIN PROTEXTION REGION");
+        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: BEGIN PROTECTION REGION");
 
     }
 
@@ -448,7 +447,7 @@ void _Delimiter::_begin_tile_array() {
         if (cell_path_direct < 0 || cell_path_direct > 3) {
 
             _log << "[ERROR] Invalid C0-19-P2: Cell Path Direction " << cell_path_direct << '\n';
-            std::exit(EXIT_FAILURE);
+            throw std::runtime_error("[CGM] INVALID PARAM: BEGIN TILE ARRAY — Cell Path Direction");
 
         }
 
@@ -457,7 +456,7 @@ void _Delimiter::_begin_tile_array() {
         if (!(line_prog_direct == 0 || line_prog_direct == 1)) {
 
             _log << "[ERROR] Invalid C0-19-P3: Line Progression Direction " << line_prog_direct << '\n';
-            std::exit(EXIT_FAILURE);
+            throw std::runtime_error("[CGM] INVALID PARAM: BEGIN TILE ARRAY — Line Progression Direction");
 
         }
 
@@ -542,7 +541,7 @@ void _Delimiter::_begin_app_structure() {
         if (!(inheritance_flag == 0 || inheritance_flag == 1)) {
 
             _log << "[ERROR] Invalid C0-21-P3: Inheritance Flag " << inheritance_flag << '\n';
-            std::exit(EXIT_FAILURE);
+            throw std::runtime_error("[CGM] INVALID PARAM: BEGIN APPLICATION STRUCTURE — Inheritance Flag");
 
         }
 
@@ -585,6 +584,10 @@ void _Delimiter::_begin_app_structure_body() {
 void _Delimiter::_end_app_structure() {
 
     if (_state.flags.SOS()) {
+
+        if (_state.aps_stack.empty()) {
+            throw std::runtime_error("[CGM] STATE CORRUPTION: END APPLICATION STRUCTURE — aps_stack is empty");
+        }
 
         _state.flags.aps_body_depth--;
         _state.flags.aps_depth--;
