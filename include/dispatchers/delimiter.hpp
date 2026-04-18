@@ -1,30 +1,24 @@
 # pragma once
 
 # include <fstream>
-# include <unordered_map>
-# include <memory>
 
 # include "schemes/element.hpp"
-# include "schemes/graphics_state.hpp"
-# include "dom/node.hpp"
+# include "schemes/state.hpp"
+
 
 
 
 class _Delimiter {
 
     const CgmElement& _elem;
-    GraphicsState& _state;
-    std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>>& _segment_store;
-    std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>>& _protection_regions;
+    State& _state;
     std::ofstream& _log;
 
 
     public:
         _Delimiter(
-            GraphicsState& state,
+            State& state,
             const CgmElement& elem,
-            std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>>& segment_store,
-            std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>>& protection_regions,
             std::ofstream& log
         );
         void dispatch();

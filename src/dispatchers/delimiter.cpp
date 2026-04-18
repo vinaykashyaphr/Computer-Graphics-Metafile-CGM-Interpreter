@@ -4,23 +4,15 @@
 # include "utils/generic.hpp"
 # include <cstddef>
 # include <cstdint>
-#include <stdexcept>
+# include <stdexcept>
 # include <iostream>
 
 
 
 
-_Delimiter::_Delimiter(
-    GraphicsState& state,
-    const CgmElement& elem,
-    std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>>& segment_store,
-    std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>>& protection_regions,
-    std::ofstream& log
-):
+_Delimiter::_Delimiter(State& state, const CgmElement& elem, std::ofstream& log):
     _state(state),
     _elem(elem),
-    _segment_store(segment_store),
-    _protection_regions(protection_regions),
     _log(log)
 {}
 
@@ -233,7 +225,8 @@ void _Delimiter::_begin_segment() {
         std::size_t i = 0;
         std::uint32_t name = param_reader::read_name(_state, _elem.params, i);
 
-        _segment_store.try_emplace(name);
+        
+        _state.segment_store.try_emplace(name);
 
         _log << "[CGM] BEGIN SEGMENT: " << name << '\n';
 
@@ -318,7 +311,7 @@ void _Delimiter::_begin_protection_region() {
         std::size_t i = 0;
         std::uint32_t index = param_reader::read_index(_state, _elem.params, i);
 
-        _protection_regions.try_emplace(index);
+        _state.protection_regions.try_emplace(index);
 
         _log << "[CGM] BEGIN PROTECTION REGION: " << index << '\n';
 
@@ -592,7 +585,7 @@ void _Delimiter::_end_app_structure() {
         _state.flags.aps_body_depth--;
         _state.flags.aps_depth--;
 
-        GraphicsState::APSEntry completed = std::move(_state.aps_stack.back());
+        State::APSEntry completed = std::move(_state.aps_stack.back());
         _state.aps_stack.pop_back();
         std::string key = completed.id;
         _state.aps_completed.emplace(std::move(key), std::move(completed));

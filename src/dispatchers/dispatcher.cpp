@@ -2,7 +2,7 @@
 # include "schemes/cgm_classes.hpp"
 # include "dispatchers/metafile_desc.hpp"
 # include "utils/generic.hpp"
-# include "schemes/graphics_state.hpp"
+# include "schemes/state.hpp"
 # include "dispatchers/delimiter.hpp"
 
 
@@ -10,7 +10,7 @@
 
 Dispatcher::Dispatcher(const std::vector<CgmElement>& elements):
     _elements(elements),
-    _state(GraphicsState()),
+    _state(State()),
     _logger("_logs/dispatcher.log")
 {}
 
@@ -28,7 +28,7 @@ void Dispatcher::dispatch() {
 
             case CgmClass::DELIMITER: {
 
-                _Delimiter delimiter(_state, el, _segment_store, _protection_regions, log);
+                _Delimiter delimiter(_state, el, log);
                 delimiter.dispatch();
 
                 break;

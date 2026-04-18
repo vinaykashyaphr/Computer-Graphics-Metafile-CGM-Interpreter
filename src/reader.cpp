@@ -47,6 +47,7 @@ Reader::ElementProps Reader::get_props(std::size_t& elem_index) {
     std::uint16_t param_len = word & 0x1F;
 
     return {elem_class, elem_id, param_len};
+
 }
 
 

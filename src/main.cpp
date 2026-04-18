@@ -33,11 +33,6 @@ int main(int argc, char* argv[]) {
     Dispatcher dispatcher(elements);
     dispatcher.dispatch();
 
-    // for (auto& el : elements) {
-    //     printf("class=%d id=%d params=%zu bytes\n",
-    //            el.elem_class, el.elem_id, el.params.size());
-    // }
-
 }
 
 

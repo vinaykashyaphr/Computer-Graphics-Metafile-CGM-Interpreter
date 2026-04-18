@@ -3,7 +3,7 @@
 # include <fstream>
 
 # include "schemes/element.hpp"
-# include "schemes/graphics_state.hpp"
+# include "schemes/state.hpp"
 
 
 
@@ -11,11 +11,11 @@
 class _MetafileDescriptor {
 
     const CgmElement& _elem;
-    GraphicsState& _state;
+    State& _state;
     std::ofstream& _log;
 
     public:
-        _MetafileDescriptor(GraphicsState& state, const CgmElement& elem, std::ofstream& log);
+        _MetafileDescriptor(State& state, const CgmElement& elem, std::ofstream& log);
         void dispatch();
 
     private:

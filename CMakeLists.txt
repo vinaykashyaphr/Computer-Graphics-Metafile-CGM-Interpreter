@@ -28,6 +28,7 @@ add_executable(
     ${SRC_DIR}/loader.cpp
     ${SRC_DIR}/reader.cpp
     ${SRC_DIR}/param_readers.cpp
+    ${SRC_DIR}/schemes/state.cpp
     ${SRC_DIR}/dispatchers/dispatcher.cpp
     ${SRC_DIR}/dispatchers/delimiter.cpp
     ${SRC_DIR}/dispatchers/metafile_desc.cpp

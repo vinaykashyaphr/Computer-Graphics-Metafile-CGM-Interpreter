@@ -5,8 +5,9 @@
 # include <stdexcept>
 # include <string>
 
-# include "schemes/graphics_state.hpp"
+# include "schemes/state.hpp"
 # include "param_reader.hpp"
+
 
 
 
@@ -22,7 +23,7 @@ std::int32_t param_reader::read_enum(const std::vector<std::uint8_t>& p, std::si
 
 
 
-std::int32_t param_reader::read_int(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+std::int32_t param_reader::read_int(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.int_bytes < 1 || s.int_bytes > 4) {
 
@@ -75,7 +76,7 @@ std::int32_t param_reader::read_int(const GraphicsState& s, const std::vector<st
 
 
 
-std::uint32_t param_reader::_read_index(int prec_bytes, const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+std::uint32_t param_reader::_read_index(int prec_bytes, const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (prec_bytes == 1) {
 
@@ -120,7 +121,7 @@ std::uint32_t param_reader::_read_index(int prec_bytes, const GraphicsState& s, 
 
 
 
-std::uint32_t param_reader::read_index(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+std::uint32_t param_reader::read_index(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.index_bytes < 1 || s.index_bytes > 4) {
 
@@ -134,7 +135,7 @@ std::uint32_t param_reader::read_index(const GraphicsState& s, const std::vector
 
 
 
-double param_reader::_read_float(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+double param_reader::_read_float(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.real_bytes == 4) {
 
@@ -171,7 +172,7 @@ double param_reader::_read_float(const GraphicsState& s, const std::vector<std::
 }
 
 
-double param_reader::_read_fixed(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+double param_reader::_read_fixed(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.real_bytes == 4) {
 
@@ -205,7 +206,7 @@ double param_reader::_read_fixed(const GraphicsState& s, const std::vector<std::
 }
 
 
-double param_reader::read_real(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+double param_reader::read_real(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.real_bytes != 4 && s.real_bytes != 8) {
 
@@ -219,7 +220,7 @@ double param_reader::read_real(const GraphicsState& s, const std::vector<std::ui
 
 
 
-double param_reader::read_vdc(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+double param_reader::read_vdc(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.vdc_is_real)
         return read_real(s, p, i);
@@ -230,7 +231,7 @@ double param_reader::read_vdc(const GraphicsState& s, const std::vector<std::uin
 }
 
 
-param_reader::Point param_reader::read_point(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+param_reader::Point param_reader::read_point(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     double x = read_vdc(s, p, i);
     double y = read_vdc(s, p, i);
@@ -240,7 +241,7 @@ param_reader::Point param_reader::read_point(const GraphicsState& s, const std::
 }
 
 
-std::uint32_t param_reader::read_cidx(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+std::uint32_t param_reader::read_cidx(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.cidx_bytes < 1 || s.cidx_bytes > 4) {
 
@@ -253,7 +254,7 @@ std::uint32_t param_reader::read_cidx(const GraphicsState& s, const std::vector<
 }
 
 
-std::uint32_t param_reader::read_name(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+std::uint32_t param_reader::read_name(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.name_bytes < 1 || s.name_bytes > 4) {
 
@@ -299,7 +300,7 @@ std::string param_reader::read_string(const std::vector<std::uint8_t>& p, std::s
 
 
 
-std::uint8_t param_reader::read_colour_component(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+std::uint8_t param_reader::read_colour_component(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.colour_bytes < 1 || s.colour_bytes > 4) {
 
@@ -318,15 +319,15 @@ std::uint8_t param_reader::read_colour_component(const GraphicsState& s, const s
 
 
 
-GraphicsState::ColourValue param_reader::read_colour_direct(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+State::Colour::Value param_reader::read_colour_direct(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
-    GraphicsState::ColourValue cv;
+    State::Colour::Value cv;
 
     switch (s.colour_model) {
 
         // RGB
         case 1:
-            cv.value = GraphicsState::ColourRGB{
+            cv.value = State::Colour::RGB{
                 param_reader::read_colour_component(s, p, i),
                 param_reader::read_colour_component(s, p, i),
                 param_reader::read_colour_component(s, p, i)
@@ -335,7 +336,7 @@ GraphicsState::ColourValue param_reader::read_colour_direct(const GraphicsState&
 
         // CIELAB
         case 2:
-            cv.value = GraphicsState::ColourCIELAB{
+            cv.value = State::Colour::CIELAB{
                 param_reader::read_real(s, p, i),
                 param_reader::read_real(s, p, i),
                 param_reader::read_real(s, p, i)
@@ -344,7 +345,7 @@ GraphicsState::ColourValue param_reader::read_colour_direct(const GraphicsState&
 
         // CIELUV
         case 3:
-            cv.value = GraphicsState::ColourCIELUV{
+            cv.value = State::Colour::CIELUV{
                 param_reader::read_real(s, p, i),
                 param_reader::read_real(s, p, i),
                 param_reader::read_real(s, p, i)
@@ -353,7 +354,7 @@ GraphicsState::ColourValue param_reader::read_colour_direct(const GraphicsState&
 
         // CMYK
         case 4:
-            cv.value = GraphicsState::ColourCMYK{
+            cv.value = State::Colour::CMYK{
                 param_reader::read_colour_component(s, p, i),
                 param_reader::read_colour_component(s, p, i),
                 param_reader::read_colour_component(s, p, i),
@@ -363,7 +364,7 @@ GraphicsState::ColourValue param_reader::read_colour_direct(const GraphicsState&
 
         // RGB-related
         case 5:
-            cv.value = GraphicsState::ColourRGBRelated{
+            cv.value = State::Colour::RGBRelated{
                 param_reader::read_real(s, p, i),
                 param_reader::read_real(s, p, i),
                 param_reader::read_real(s, p, i)
@@ -385,7 +386,7 @@ GraphicsState::ColourValue param_reader::read_colour_direct(const GraphicsState&
 
 
 
-GraphicsState::ColourValue param_reader::read_colour(const GraphicsState& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
+State::Colour::Value param_reader::read_colour(const State& s, const std::vector<std::uint8_t>& p, std::size_t& i) {
 
     if (s.colour_sel_mode != 0 && s.colour_sel_mode != 1) {
         throw std::runtime_error("Invalid COLOUR SELECTION MODE: " + std::to_string(s.colour_sel_mode));

@@ -6,7 +6,7 @@
 
 
 
-_MetafileDescriptor::_MetafileDescriptor(GraphicsState& state, const CgmElement& elem, std::ofstream& log):
+_MetafileDescriptor::_MetafileDescriptor(State& state, const CgmElement& elem, std::ofstream& log):
     _elem(elem),
     _state(state),
     _log(log)
