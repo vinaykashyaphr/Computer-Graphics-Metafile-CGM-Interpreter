@@ -1,6 +1,7 @@
 # pragma once
 
 # include <cstdint>
+# include <optional>
 # include <variant>
 # include <utility>
 # include <array>
@@ -10,6 +11,7 @@
 # include <vector>
 # include <unordered_map>
 
+#include "schemes/element.hpp"
 # include "schemes/flags.hpp"
 # include "dom/node.hpp"
 
@@ -142,6 +144,22 @@ struct SnapshotContext {
 
 
 
+struct SegmentEntry {
+
+    bool is_global = false;
+    std::vector<std::unique_ptr<Node>> nodes;
+
+};
+
+
+struct CharSetEntry {
+
+    int type = 0;
+    std::string designation;
+
+};
+
+
 
 struct State {
 
@@ -164,6 +182,8 @@ struct State {
     Colour::Value get_colour(int index) const;
 
     std::string metafile_name;
+    std::optional<std::string> current_picture_name = std::nullopt;
+    std::optional<std::uint32_t> current_segment_name = std::nullopt;
 
     void reset_picture_state();
 
@@ -175,8 +195,23 @@ struct State {
 
     using Snapshot = SnapshotContext;
 
-    std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>> segment_store;
+    std::unordered_map<std::uint32_t, SegmentEntry> segment_store;
     std::unordered_map<std::uint32_t, std::vector<std::unique_ptr<Node>>> protection_regions;
+
+
+    // class 1
+    int metafile_version = 0;
+    std::string metafile_desc;
+
+    int max_colour_index = 63;
+    Colour::Extent colour_value_extent;
+
+    std::vector<CgmElement> metafile_defaults;
+    std::vector<std::string> font_list;
+    std::vector<CharSetEntry> char_set_list; 
+
+    int char_coding_announcer = 0;
+
 
 };
 

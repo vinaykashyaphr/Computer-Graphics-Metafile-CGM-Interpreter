@@ -4,6 +4,7 @@
 # include "utils/generic.hpp"
 # include <cstddef>
 # include <cstdint>
+# include <optional>
 # include <stdexcept>
 # include <iostream>
 
@@ -160,9 +161,10 @@ void _Delimiter::_begin_picture() {
 
         std::size_t i = 0;
 
-        std::string val = param_reader::read_string(_elem.params, i);
+        std::string name = param_reader::read_string(_elem.params, i);
+        _state.current_picture_name.emplace(name);
 
-        _log << "[CGM] BEGIN PICTURE: " << val << '\n';
+        _log << "[CGM] BEGIN PICTURE: " << name << '\n';
 
     }
 
@@ -201,6 +203,7 @@ void _Delimiter::_end_picture() {
 
         _state.flags.in_picture_body = false;
         _state.flags.in_picture = false;
+        _state.current_picture_name = std::nullopt;
 
         _log << "[CGM] END PICTURE" << '\n';
 
@@ -225,8 +228,9 @@ void _Delimiter::_begin_segment() {
         std::size_t i = 0;
         std::uint32_t name = param_reader::read_name(_state, _elem.params, i);
 
-        
         _state.segment_store.try_emplace(name);
+        _state.current_segment_name.emplace(name);
+        _state.segment_store[name].is_global = _state.flags.GSS();
 
         _log << "[CGM] BEGIN SEGMENT: " << name << '\n';
 
@@ -247,6 +251,7 @@ void _Delimiter::_end_segment() {
     if ((_state.flags.GSS() || _state.flags.DSS()) || _state.flags.LSS()) {
 
         _state.flags.in_segment = false;
+        _state.current_segment_name = std::nullopt;
 
         _log << "[CGM] END SEGMENT" << '\n';
 
@@ -470,21 +475,36 @@ void _Delimiter::_begin_tile_array() {
         _state.tile_array_ctx = {
             position.x,
             position.y,
-            cell_path_direct,
-            line_prog_direct,
-            num_of_tiles_p_direct,
-            num_of_tiles_line_direct,
-            num_of_tile_path_direct,
-            num_of_tile_line_direct,
+            static_cast<int>(cell_path_direct),
+            static_cast<int>(line_prog_direct),
+            static_cast<int>(num_of_tiles_p_direct),
+            static_cast<int>(num_of_tiles_line_direct),
+            static_cast<int>(num_of_tile_path_direct),
+            static_cast<int>(num_of_tile_line_direct),
             cell_size_path_direct,
             cell_size_line_direct,
-            img_offset_path_dir,
-            img_offset_line_direct,
-            img_num_cells_path_dir,
-            img_num_cells_line_dir
+            static_cast<int>(img_offset_path_dir),
+            static_cast<int>(img_offset_line_direct),
+            static_cast<int>(img_num_cells_path_dir),
+            static_cast<int>(img_num_cells_line_dir)
         };
 
-        _log << "[CGM] BEGIN TILE ARRAY" << '\n';
+        _log << "[CGM] BEGIN TILE ARRAY:"
+             << "\n\t" << position.x
+             << "\n\t" << position.y
+             << "\n\t" << cell_path_direct
+             << "\n\t" << line_prog_direct
+             << "\n\t" << num_of_tiles_p_direct
+             << "\n\t" << num_of_tiles_line_direct
+             << "\n\t" << num_of_tile_path_direct
+             << "\n\t" << num_of_tile_line_direct
+             << "\n\t" << cell_size_path_direct
+             << "\n\t" << cell_size_line_direct
+             << "\n\t" << img_offset_path_dir
+             << "\n\t" << img_offset_line_direct
+             << "\n\t" << img_num_cells_path_dir
+             << "\n\t" << img_num_cells_line_dir
+             << '\n';
 
     }
 
@@ -538,9 +558,13 @@ void _Delimiter::_begin_app_structure() {
 
         }
 
-        _state.aps_stack.push_back({ aps_id, aps_type, inheritance_flag });
+        _state.aps_stack.push_back({ aps_id, aps_type, static_cast<int>(inheritance_flag) });
 
-        _log << "[CGM] BEGIN APPLICATION STRUCTURE: " << aps_id << " (" << aps_type << ")" << '\n';
+        _log << "[CGM] BEGIN APPLICATION STRUCTURE:" 
+             << "\n\t" << aps_id 
+             << "\n\t" << aps_type
+             << "\n\t" << inheritance_flag
+             << '\n';
 
     }
 

@@ -16,11 +16,7 @@ class _Delimiter {
 
 
     public:
-        _Delimiter(
-            State& state,
-            const CgmElement& elem,
-            std::ofstream& log
-        );
+        _Delimiter(State& state, const CgmElement& elem, std::ofstream& log);
         void dispatch();
 
     private:

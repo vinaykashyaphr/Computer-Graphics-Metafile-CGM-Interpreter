@@ -32,12 +32,12 @@ struct Flags {
 
     // Picture Closed State
     bool PCS() const {
-        return in_metafile && !in_picture && !in_picture_body;
+        return in_metafile && !in_picture;
     }
 
     // Metafile Descriptor State
     bool MDS() const {
-        return in_metafile && !in_picture && !in_picture_body && !in_segment;
+        return in_metafile && !in_picture && !in_segment;
     }
 
     // Picture Description State
@@ -47,17 +47,17 @@ struct Flags {
 
     // Picture Open State
     bool POS() const {
-        return in_metafile && in_picture && in_picture_body && !in_segment;
+        return in_metafile && in_picture && in_picture_body && !in_segment && (aps_depth == 0);
     }
 
     // Structure Descriptor State
     bool SDS() const {
-        return in_metafile && in_picture && in_picture_body && (aps_depth > aps_body_depth);
+        return in_metafile && in_picture && in_picture_body && !in_segment && (aps_depth > aps_body_depth);
     }
 
     // Structure Open State
     bool SOS() const {
-        return in_metafile && in_picture && in_picture_body && (aps_body_depth > 0);
+        return in_metafile && in_picture && in_picture_body && !in_segment && (aps_body_depth > 0);
     }
 
     // Global Segment State
@@ -75,15 +75,20 @@ struct Flags {
         return in_metafile && in_picture && in_picture_body && in_segment;
     }
 
-
-    bool DR()  const { return in_metafile && in_defaults_replacement; }
+    // Defaults Replacement Mode
+    bool DR() const {
+        return in_metafile && in_defaults_replacement;
+    }
 
     
     // minor states — computed on demand
+
+    // Figure Open State
     bool FOS() const {
         return in_figure;
     }
 
+    // Pic
     bool PRS() const {
         return in_protection_region;
     }
@@ -92,7 +97,14 @@ struct Flags {
         return in_compound_path;
     }
 
-    bool TOS() const { return in_text; }
-    bool TAS() const { return in_tile_array; }
+    bool TOS() const {
+        return in_text;
+    }
+
+    bool TAS() const {
+        return in_tile_array;
+    }
 
 };
+
+

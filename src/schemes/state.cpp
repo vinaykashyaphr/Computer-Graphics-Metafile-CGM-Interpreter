@@ -1,4 +1,5 @@
 # include "schemes/state.hpp"
+#include <optional>
 
 
 
@@ -26,9 +27,16 @@ void State::reset_picture_state() {
     colour_sel_mode = 0;
     colour_table.clear();
 
+    protection_regions.clear();
+
     aps_stack.clear();
     aps_completed.clear();
 
+    current_picture_name = std::nullopt;
+    
+    std::erase_if(segment_store, [](const auto& entry) {
+        return !entry.second.is_global;
+    });
 }
 
 

@@ -14,7 +14,7 @@ CGM::CGM(const fs::path& file_path):
     _logger("_logs/loader.log")
 {
 
-    if (!(file_path.extension() == ".cgm" || file_path.extension() == ".Cgm")) {
+    if (!(file_path.extension() == ".cgm" || file_path.extension() == ".CGM")) {
         throw std::runtime_error("Invalid File: " + file_path.string());
     }
 
