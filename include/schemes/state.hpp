@@ -160,6 +160,48 @@ struct CharSetEntry {
 };
 
 
+struct VdcExtent {
+    double x1 = 0.0, y1 = 0.0;
+    double x2 = 1.0, y2 = 1.0;
+};
+
+
+
+struct ColourCalibration {
+
+    double Xn = 0.95047;
+    double Yn = 1.00000;
+    double Zn = 1.08830;
+
+    // RGB matrix
+    std::array<double, 9> matrix1{};
+
+    // RGB-Related matrix
+    std::array<double, 9> matrix2{};
+
+    int lut_size = 0;
+    struct LutPair {
+
+        std::uint8_t in;
+        std::uint8_t out;
+
+    };
+
+    std::vector<LutPair> lut_r;
+    std::vector<LutPair> lut_g;
+    std::vector<LutPair> lut_b;
+
+    int grid_size = 0;
+    std::vector<ColoursContext::Value> cmyk_grid_locations;
+
+    struct XYZ { double X, Y, Z; };
+
+    std::vector<XYZ> cmyk_grid_xyz;
+
+
+};
+
+
 
 struct State {
 
@@ -212,6 +254,12 @@ struct State {
 
     int char_coding_announcer = 0;
 
+    VdcExtent max_vdc_extent;
+
+    int segment_priority_min = 0;
+    int segment_priority_max = 0;
+
+    ColourCalibration colour_calibration;
 
 };
 

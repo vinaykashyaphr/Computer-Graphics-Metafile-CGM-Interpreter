@@ -86,11 +86,31 @@ void _MetafileDescriptor::dispatch() {
 
         case MetafileDescriptor::CHAR_SET_LIST:
             _character_set_list();
-        break;
+            break;
 
         case MetafileDescriptor::CHAR_CODING_ANNOUNCER:
             _character_coding_announcer();
-        break;
+            break;
+
+        case MetafileDescriptor::NAME_PRECISION:
+            _name_precision();
+            break;
+
+        case MetafileDescriptor::MAX_VDC_EXTENT:
+            _maximum_vdc_extent();
+            break;
+
+        case MetafileDescriptor::SEGMENT_PRIORITY_EXTENT:
+            _segment_priority_extent();
+            break;
+
+        case MetafileDescriptor::COLOUR_MODEL:
+            _colour_model();
+            break;
+
+        case MetafileDescriptor::COLOUR_CALIBRATION:
+            _colour_calibration();
+            break;
 
         default:
             generic_utils::log_unknown(_elem, _log);
@@ -546,6 +566,254 @@ void _MetafileDescriptor::_character_coding_announcer() {
     _state.char_coding_announcer = static_cast<int>(announcer);
 
     _log << "[CGM] CHARACTER CODING ANNOUNCER: " << announcer << '\n';
+
+}
+
+
+
+void _MetafileDescriptor::_name_precision() {
+
+    if (!_state.flags.MDS()) {
+
+        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: NAME PRECISION");
+
+    }
+
+    std::size_t i = 0;
+    std::int32_t name_prec = param_reader::read_int(_state, _elem.params, i);
+
+    if (name_prec != 8 && name_prec != 16 && name_prec != 24 && name_prec != 32) {
+
+        throw std::runtime_error("[CGM] Invalid NAME PRECISION: " + std::to_string(name_prec));
+
+    }
+
+    _state.name_bytes = static_cast<int>(name_prec);
+    _log << "[CGM] NAME PRECISON: " << name_prec << '\n';
+
+}
+
+
+
+void _MetafileDescriptor::_maximum_vdc_extent() {
+
+    if (!_state.flags.MDS()) {
+
+        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: MAXIMUM VDC EXTENT");
+
+    }
+
+    std::size_t i = 0;
+    auto p1 =  param_reader::read_point(_state, _elem.params, i);
+    auto p2 = param_reader::read_point(_state, _elem.params, i);
+
+    _state.max_vdc_extent = { p1.x, p1.y, p2.x, p2.y };
+
+    _log << "[CGM] MAXIMUM VDC EXTENT:"
+         << " (" << p1.x << "," << p1.y << ")"
+         << " (" << p2.x << "," << p2.y << ")\n";
+
+}
+
+
+
+void _MetafileDescriptor::_segment_priority_extent() {
+
+    if (!_state.flags.MDS()) {
+
+        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: SEGMENT PRIORITY EXTENT");
+
+    }
+
+    std::size_t i = 0;
+    std::int32_t min_priority = param_reader::read_int(_state, _elem.params, i);
+    std::int32_t max_priority = param_reader::read_int(_state, _elem.params, i);
+
+
+    if (min_priority < 0 || max_priority < 0) {
+        throw std::runtime_error("[CGM] SEGMENT PRIORITY EXTENT: values must be non-negative");
+    }
+
+
+    if (min_priority >= max_priority) {
+        throw std::runtime_error("[CGM] SEGMENT PRIORITY EXTENT: min must be less than max");
+    }
+
+    _state.segment_priority_min = static_cast<int>(min_priority);
+    _state.segment_priority_max = static_cast<int>(max_priority);
+
+    _log << "[CGM] SEGMENT PRIORITY EXTENT: (" << min_priority << ", " << max_priority << ")\n";
+
+}
+
+
+
+void _MetafileDescriptor::_colour_model() {
+
+    if (!_state.flags.MDS()) {
+
+        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: COLOUR MODEL");
+
+    }
+
+    std::size_t i = 0;
+    std::uint32_t model = param_reader::read_index(_state, _elem.params, i);
+
+    if (model < 1 || model > 5) {
+
+        throw std::runtime_error("[CGM] Invalid COLOUR MODEL: " + std::to_string(model));
+
+    }
+
+    _state.colour_model = static_cast<int>(model);
+
+    _log << "[CGM] COLOUR MODEL: " << model << " ("
+         << (model == 1 ? "RGB" :
+             model == 2 ? "CIELAB" :
+             model == 3 ? "CIELUV" :
+             model == 4 ? "CMYK" : "RGB-related")
+         << ")\n";
+
+}
+
+
+
+void _MetafileDescriptor::_colour_calibration() {
+
+    if (!_state.flags.MDS()) {
+
+        throw std::runtime_error("[CGM] MAJOR STATE FAILURE: COLOUR CALIBRATION");
+
+    }
+
+    _log << "[CGM] COLOUR CALIBRATION:";
+
+    std::size_t i = 0;
+
+    std::uint32_t calibration_selection = param_reader::read_index(_state, _elem.params, i);
+
+    if (calibration_selection > 9 || calibration_selection < 1) {
+
+        throw std::runtime_error("[CGM] Invalid CALIBRATION SELECTION: " + std::to_string(calibration_selection));
+    }
+
+    // 2 = "reference white only"                   → P2, P3, P4
+    // 3 = "reference white, matrix1"               → P2, P3, P4, P5
+    // 4 = "reference white, matrix1, LUT"          → P2, P3, P4, P5, P7, P8, P9, P10
+    // 5 = "reference white, matrix1, LUT, matrix2" → P2, P3, P4, P5, P6, P7, P8, P9, P10
+    // 6 = "reference white, matrix1, matrix2"      → P2, P3, P4, P5, P6
+    // 7 = "LUT, matrix2"                           → P6, P7, P8, P9, P10
+    // 8 = "matrix2"                                → P6
+    // 9 = "reference white, grid"                  → P2, P3, P4, P11, P12, P13
+
+    _log << "\n\tP1: " << calibration_selection;
+
+    if (
+        calibration_selection == 2 || calibration_selection == 3 || calibration_selection == 4 ||
+        calibration_selection == 5 || calibration_selection == 6 || calibration_selection == 9
+    ) {
+
+        // p2, p3, p4
+        _state.colour_calibration.Xn = param_reader::read_real(_state, _elem.params, i);
+        _state.colour_calibration.Yn = param_reader::read_real(_state, _elem.params, i);
+        _state.colour_calibration.Zn = param_reader::read_real(_state, _elem.params, i);
+        
+        _log << 
+             "\n\tP2: " << _state.colour_calibration.Xn <<
+             "\n\tP3: " << _state.colour_calibration.Yn <<
+             "\n\tP4: " << _state.colour_calibration.Zn <<
+             '\n';
+    }
+
+
+    if (
+        calibration_selection == 3 || calibration_selection == 4 ||
+        calibration_selection == 5 || calibration_selection == 6
+    ) {
+
+        // add p5
+        for (int n = 0; n < 9; n++) {
+
+            _state.colour_calibration.matrix1[n] = param_reader::read_real(_state, _elem.params, i);
+
+            _log << "\n\tP5: " << _state.colour_calibration.matrix1[n] << ' ';
+
+        }
+
+        _log << '\n';
+
+    }
+
+
+    if (
+        calibration_selection == 5 || calibration_selection == 6 ||
+        calibration_selection == 7 || calibration_selection == 8
+    ) {
+
+        // add p6
+        for (int n = 0; n < 9; n++) {
+
+            _state.colour_calibration.matrix2[n] = param_reader::read_real(_state, _elem.params, i);
+
+            _log << "\n\tP6: " << _state.colour_calibration.matrix2[n] << ' ';
+
+        }
+
+        _log << '\n';
+
+    }
+
+
+    if (calibration_selection == 4 || calibration_selection == 5 || calibration_selection == 7) {
+
+        // add p7, p8, p9, p10
+        std::int32_t lut_n = param_reader::read_int(_state, _elem.params, i);
+        _state.colour_calibration.lut_size = lut_n;
+
+        _log << "\n\tP7: " << lut_n << '\n';
+
+        for (int n = 0; n < lut_n; n++)
+            _state.colour_calibration.lut_r.push_back({
+                param_reader::read_colour_component(_state, _elem.params, i),
+                param_reader::read_colour_component(_state, _elem.params, i)
+            });
+
+        for (int n = 0; n < lut_n; n++)
+            _state.colour_calibration.lut_g.push_back({
+                param_reader::read_colour_component(_state, _elem.params, i),
+                param_reader::read_colour_component(_state, _elem.params, i)
+            });
+
+        for (int n = 0; n < lut_n; n++)
+            _state.colour_calibration.lut_b.push_back({
+                param_reader::read_colour_component(_state, _elem.params, i),
+                param_reader::read_colour_component(_state, _elem.params, i)
+            });
+
+    }
+
+
+    if (calibration_selection == 9) {
+
+        // add p11, p12, p13
+        std::int32_t m = param_reader::read_int(_state, _elem.params, i);
+        _state.colour_calibration.grid_size = m;
+
+        _log << "\n\tP11: " << m << '\n';
+
+        for (int n = 0; n < m; n++)
+            _state.colour_calibration.cmyk_grid_locations.push_back(
+                param_reader::read_colour_direct(_state, _elem.params, i)
+            );
+
+        for (int n = 0; n < m; n++) 
+            _state.colour_calibration.cmyk_grid_xyz.push_back({
+                param_reader::read_real(_state, _elem.params, i),
+                param_reader::read_real(_state, _elem.params, i),
+                param_reader::read_real(_state, _elem.params, i)
+            });
+
+    }
 
 }
 

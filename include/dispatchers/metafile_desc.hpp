@@ -34,6 +34,12 @@ class _MetafileDescriptor {
         void _font_list();
         void _character_set_list();
         void _character_coding_announcer();
+        void _name_precision();
+        void _maximum_vdc_extent();
+        void _segment_priority_extent();
+        void _colour_model();
+        void _colour_calibration();
+
 
         // void handle_colour_idx_prec(const CgmElement& elem);
         // void handle_name_precision(const CgmElement& elem);
